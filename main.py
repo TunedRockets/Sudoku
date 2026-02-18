@@ -1,1 +1,7 @@
-blargh
+
+
+
+
+
+
+print("Hello world")
