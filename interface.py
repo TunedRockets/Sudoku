@@ -14,6 +14,8 @@ class Window:
         "line_width": 1,
         "bigline_width":4,
         "default_size":(400,500),
+        "digit_font":'freesansbold.ttf',
+        "digit_ratio": 0.85
     }
 
     def __init__(self,board:Board|None=None) -> None:
@@ -25,7 +27,7 @@ class Window:
 
         pg.init()
         pg.font.init()
-        self.font = pg.font.Font('freesansbold.ttf',32)
+        self.font = pg.font.Font(self.flags['digit_font'],32)
         self.screen = pg.display.set_mode(self.flags["default_size"],pg.RESIZABLE|pg.DOUBLEBUF)
         pg.display.set_caption("Sudoku")
     
@@ -70,11 +72,24 @@ class Window:
 
     def draw_digits(self):
 
+        # fix font if needed:
+        c = self.rect.width/9 # cell size
+        fs = int(c * self.flags['digit_ratio'])
+        if fs != self.font.size('0')[1]:
+            self.font = pg.font.Font(self.flags['digit_font'],fs)
+
+
+        for idx, d in enumerate(self.board):
+            if d == 0: continue
+            x,y = divmod(idx,9)
+            txt = self.font.render(str(d),True,self.flags["line_color"])
+            size = txt.get_rect().size
+            self.screen.blit(txt, (
+                self.rect.topleft[0] + c*(x+0.5)-size[0]/2,
+                self.rect.topleft[1] + c*(y+0.5)-size[1]/2,
+            ))
+
         
-        txt = self.font.render("TEST 0123",True, self.flags["line_color"], "white")
-        txt.get_rect().center = (200,200)
-
-
     def __del__(self):
         pg.font.quit()
         pg.quit()
@@ -87,6 +102,9 @@ class Window:
 
 def main():
     win = Window()
+    win.board[0,2] = 5
+    win.board[0,1] = 2
+    win.board[3,7] = 7
     while win.frame():pass
 
 

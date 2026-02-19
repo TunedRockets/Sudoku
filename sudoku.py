@@ -36,9 +36,9 @@ class Board:
         return self
 
     def __next__(self):
-        if self.iterand >= 9*9 - 1: raise StopIteration
-        self.iterand +=1
+        if self.iterand >= 9*9: raise StopIteration
         i,j = divmod(self.iterand, 9)
+        self.iterand +=1
         return self[i,j]
     
     def valid(self)->bool:
