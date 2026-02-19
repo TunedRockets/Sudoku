@@ -10,6 +10,7 @@ class Window:
         "bg_color":(200,200,200),
         "board_color":(170,170,170),
         "line_color":(100,100,100),
+        "select_color":(170,170,230),
         "border_size": 10,
         "line_width": 1,
         "bigline_width":4,
@@ -39,11 +40,15 @@ class Window:
 
         self.draw_grid()
         self.draw_digits()
-        pg.display.flip()
+        self.keep_click()
+        
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return False
-        else: return True
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                self.click()
+        pg.display.flip()
+        return True
 
     def draw_grid(self):
         '''draws the sodoku grid at the top of the screen'''
@@ -89,7 +94,32 @@ class Window:
                 self.rect.topleft[1] + c*(y+0.5)-size[1]/2,
             ))
 
-        
+    def click(self):
+        '''get click and use it'''
+        x,y = pg.mouse.get_pos()
+        self.click_location = (x,y)
+        # light up grid:
+        c = self.rect.width/9 # cell size
+        x_cell = int(x/c)
+        y_cell = int(y/c)
+        pg.draw.circle(self.screen,'green',(
+            self.rect.topleft[0] + c*(x_cell+0.5), self.rect.topleft[1] + c*(y_cell+0.5)),
+            10)
+    def keep_click(self):
+        '''keep click if button pressed down'''
+
+        if pg.mouse.get_pressed()[0]:
+            x,y = self.click_location
+            # light up grid:
+            c = self.rect.width/9 # cell size
+            x_cell = int(x/c)
+            y_cell = int(y/c)
+            pg.draw.circle(self.screen,'green',(
+                self.rect.topleft[0] + c*(x_cell+0.5), self.rect.topleft[1] + c*(y_cell+0.5)),
+                10)
+
+
+
     def __del__(self):
         pg.font.quit()
         pg.quit()
