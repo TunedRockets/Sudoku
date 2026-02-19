@@ -11,6 +11,8 @@ class Window:
         "board_color":(170,170,170),
         "line_color":(100,100,100),
         "select_color":(150,150,230),
+        "win_color": (70,250,70),
+        "lose_color":(250,70,70),
         "border_size": 10,
         "line_width": 1,
         "bigline_width":4,
@@ -22,7 +24,9 @@ class Window:
     def __init__(self,board:Board|None=None) -> None:
         
         self.board:Board = board if not board is None else Board()
-        self.selected = (5,5)
+        self.selected = None
+        self.win = False
+        self.lose = False
         self.init_pg()
 
     def init_pg(self):
@@ -42,12 +46,15 @@ class Window:
         self.draw_grid()
         self.draw_digits()
         self.draw_selected()
+        self.draw_border()
         
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return False
             elif event.type == pg.MOUSEBUTTONDOWN:
                 self.select()
+            elif event.type == pg.KEYDOWN:
+                self.key_press(event.key)
         pg.display.flip()
         return True
 
@@ -95,7 +102,6 @@ class Window:
                 self.rect.topleft[1] + c*(y+0.5)-size[1]/2,
             ))
 
-
     def select(self):
         x,y = pg.mouse.get_pos()
         x -= self.rect.topleft[0]
@@ -103,13 +109,14 @@ class Window:
         c = self.rect.width/9 # cell size
         x_cell = int(x/c)
         y_cell = int(y/c)
-        print(f"{x_cell=}, {y_cell=}")
         if not(x_cell <= 9 and y_cell <= 9):
+            self.selected = None
             return
         self.selected = (x_cell,y_cell)
 
     def draw_selected(self):
         '''draw the selected square'''
+        if self.selected is None: return
 
         c = self.rect.width/9 # cell size
         tl = (self.rect.topleft[0] + c*self.selected[0], self.rect.topleft[1] + c*self.selected[1])
@@ -120,7 +127,36 @@ class Window:
                       self.flags["bigline_width"],
                       int(self.flags["bigline_width"]))
 
+    def key_press(self, key):
+        k = pg.key.name(key)
+        if '0' <= k <= '9':
+            if self.selected is None: return
+            # set digit:
+            self.board[self.selected] = int(k)
+        if key == pg.K_BACKSPACE:
+            self.board[self.selected] = 0
+        self.check_board()
 
+    def check_board(self):
+        '''checks if board is valid or solved, color codes border accordingly'''
+        if not self.board.valid():
+            self.lose = True
+        else:
+            self.lose = False
+        if self.board.solved():
+            self.win = True
+        else:
+            self.win = False
+    
+    def draw_border(self):
+        '''draw border if needed'''
+        color = None
+        if self.win: color = self.flags["win_color"]
+        elif self.lose: color = self.flags['lose_color']
+
+        if color is None: return
+
+        pg.draw.rect(self.screen,color,self.rect,self.flags["border_size"],self.flags["border_size"])
 
     def __del__(self):
         pg.font.quit()

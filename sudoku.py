@@ -54,9 +54,9 @@ class Board:
         
         # row/col/box check:
         for i in range(9):
-            row = [False]*9 # check both at same time for efficiency
-            col = [False]*9
-            box = [False]*9 
+            row = [False]*10 # check both at same time for efficiency
+            col = [False]*10
+            box = [False]*10 # 3 bools to much but makes indexing easier
             xx, yy = divmod(i,3)
             for j in range(9):
                 r = self[i,j]
