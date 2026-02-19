@@ -10,7 +10,7 @@ class Window:
         "bg_color":(200,200,200),
         "board_color":(170,170,170),
         "line_color":(100,100,100),
-        "select_color":(170,170,230),
+        "select_color":(150,150,230),
         "border_size": 10,
         "line_width": 1,
         "bigline_width":4,
@@ -22,6 +22,7 @@ class Window:
     def __init__(self,board:Board|None=None) -> None:
         
         self.board:Board = board if not board is None else Board()
+        self.selected = (5,5)
         self.init_pg()
 
     def init_pg(self):
@@ -40,13 +41,13 @@ class Window:
 
         self.draw_grid()
         self.draw_digits()
-        self.keep_click()
+        self.draw_selected()
         
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 return False
             elif event.type == pg.MOUSEBUTTONDOWN:
-                self.click()
+                self.select()
         pg.display.flip()
         return True
 
@@ -94,29 +95,30 @@ class Window:
                 self.rect.topleft[1] + c*(y+0.5)-size[1]/2,
             ))
 
-    def click(self):
-        '''get click and use it'''
+
+    def select(self):
         x,y = pg.mouse.get_pos()
-        self.click_location = (x,y)
-        # light up grid:
+        x -= self.rect.topleft[0]
+        y -= self.rect.topleft[1]
         c = self.rect.width/9 # cell size
         x_cell = int(x/c)
         y_cell = int(y/c)
-        pg.draw.circle(self.screen,'green',(
-            self.rect.topleft[0] + c*(x_cell+0.5), self.rect.topleft[1] + c*(y_cell+0.5)),
-            10)
-    def keep_click(self):
-        '''keep click if button pressed down'''
+        print(f"{x_cell=}, {y_cell=}")
+        if not(x_cell <= 9 and y_cell <= 9):
+            return
+        self.selected = (x_cell,y_cell)
 
-        if pg.mouse.get_pressed()[0]:
-            x,y = self.click_location
-            # light up grid:
-            c = self.rect.width/9 # cell size
-            x_cell = int(x/c)
-            y_cell = int(y/c)
-            pg.draw.circle(self.screen,'green',(
-                self.rect.topleft[0] + c*(x_cell+0.5), self.rect.topleft[1] + c*(y_cell+0.5)),
-                10)
+    def draw_selected(self):
+        '''draw the selected square'''
+
+        c = self.rect.width/9 # cell size
+        tl = (self.rect.topleft[0] + c*self.selected[0], self.rect.topleft[1] + c*self.selected[1])
+        br = (self.rect.topleft[0] + c*(self.selected[0]+1), self.rect.topleft[1] + c*(self.selected[1]+1))
+        rect = pg.Rect(tl[0],tl[1],(br[0]-tl[0]),(br[1]-tl[1]))
+        pg.draw.rect(self.screen,self.flags["select_color"],
+                      rect,
+                      self.flags["bigline_width"],
+                      int(self.flags["bigline_width"]))
 
 
 
