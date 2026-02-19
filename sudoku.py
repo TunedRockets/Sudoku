@@ -41,24 +41,64 @@ class Board:
         i,j = divmod(self.iterand, 9)
         return self[i,j]
     
-    def invalid(self)->bool:
+    def valid(self)->bool:
         '''
-        Docstring for invalid
+        Docstring for valid
         Checks if current board is valid. that is:
         - every digit is either in 1-9, or unknown (=0)
         - every row, column, or box has at maximum one of each digit
         '''
         # invalid values:
+        for x in self:
+            if x < 0 or x > 9: return False
+        
+        # row/col/box check:
+        for i in range(9):
+            row = [False]*9 # check both at same time for efficiency
+            col = [False]*9
+            box = [False]*9 
+            xx, yy = divmod(i,3)
+            for j in range(9):
+                r = self[i,j]
+                c = self[j,i]
+                
+                # box coords = divmod(i,3)
+                # inside coords = divmod(j,3)
+                
+                x, y = divmod(j,3)
+                b = self[3*xx+x, 3*yy+y]
 
-
-
+                # check values:
+                if r != 0:
+                    if row[r]: return False
+                    else: row[r] = True
+                if c != 0:
+                    if col[c]: return False
+                    else: col[c] = True
+                if b != 0:
+                    if box[b]: return False
+                    else: box[b] = True
+        # everything checked, so it's still valid:
         return True
     
+    def solved(self)->bool:
+        '''
+        Docstring for solved
+        Checks if current board is solved. that is, it's valid,
+        and no cells are unknown
+        '''
+        for x in self:
+            if x == 0: return False
+        else:
+            return self.valid()
+
 
 if __name__ == "__main__":
     b = Board()
     b[2,1] = 3
-    print(b[2,1])
+    print(b.valid())
+    b[5,1] = 3
+    print(b.valid())
     i = 0
     for x in b:
         i += 1
